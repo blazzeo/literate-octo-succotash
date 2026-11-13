@@ -1,0 +1,30 @@
+[package]
+name = "auth"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+async-trait.workspace = true
+axum = { workspace = true, features = ["form"] }
+axum-extra.workspace = true
+clap.workspace = true
+cookie.workspace = true
+dotenv.workspace = true
+futures-util.workspace = true
+init_utils.workspace = true
+jsonwebtoken.workspace = true
+keycloak.workspace = true
+lettre.workspace = true
+rdkafka.workspace = true
+redis.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+service_error = { workspace = true, features = ["smtp", "kafka", "keycloak"] }
+time.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing_logger.workspace = true
+uuid.workspace = true
+validator.workspace = true
+middleware.workspace = true

@@ -1,0 +1,8 @@
+[package]
+name = "tracing_logger"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tracing = { workspace = true }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "ansi"] }

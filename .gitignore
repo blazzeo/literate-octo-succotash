@@ -1,0 +1,9 @@
+**/.DS_Store
+**/.env
+**/.env.docker
+**/target/
+**/Cargo.lock
+**/static/
+otterscan
+cache
+deps/

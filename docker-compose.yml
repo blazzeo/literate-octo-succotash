@@ -1,0 +1,376 @@
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  # -------
+  # General
+  # -------
+  kafka:
+    image: 'apache/kafka:3.7.0'
+    ports:
+      - '9092:9092'
+      - '9094:9094'
+    environment:
+      # Основные параметры брокера
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # Упрощённые настройки
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    profiles:
+      - all
+      - service
+      - auth
+      - customers
+      - vendors
+    networks:
+      - app-network
+
+  init-topics:
+    image: apache/kafka:latest
+    depends_on:
+      - kafka
+    networks:
+      - app-network
+    entrypoint: ["/bin/bash", "/init-topics.sh"]
+    volumes:
+      - ./init-topics.sh:/init-topics.sh:ro
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    restart: "no"
+    profiles:
+      - all
+      - service
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.4
+    command: start-dev --import-realm --features=scripts --spi-upload-scripts=enabled --verbose
+    volumes:
+      - ./crates/auth/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "8080:8080"
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - KC_PROXY=edge
+      - KC_FEATURES=scripts
+      - KC_IMPORT_SCRIPTS=true
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=true
+      - KC_HTTP_ENABLED=false
+      - KC_HOSTNAME_URL=https://api.emarket.com/keycloak
+      - KC_HOSTNAME_ADMIN_URL=https://api.emarket.com/keycloak
+      - KC_HOSTNAME_PORT=443
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
+      - KC_TLS_HOSTNAME_VERIFIER=ANY
+      - KC_SPI_TRUSTSTORE_FILE_DISABLED=true
+    profiles:
+      - all
+      - service
+      - auth
+      - customers
+      - vendors
+      - blob
+      - orders
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    profiles:
+      - all
+      - service
+      - auth
+    networks:
+      - app-network
+
+  customers_db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: super_admin
+      POSTGRES_PASSWORD: super_admin
+      POSTGRES_DB: emarket
+    profiles:
+      - all
+      - service
+      - customers
+    networks:
+      - app-network
+
+  vendors_db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: super_admin
+      POSTGRES_PASSWORD: super_admin
+      POSTGRES_DB: emarket
+    profiles:
+      - all
+      - service
+      - vendors
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - ./mongod.conf:/etc/mongod.conf
+    command: ["mongod", "--config", "/etc/mongod.conf"]
+    profiles:
+      - all
+      - service
+      - goods
+    networks:
+      - app-network
+
+  orders_db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_USER: super_admin
+      POSTGRES_PASSWORD: super_admin
+      POSTGRES_DB: emarket
+    profiles:
+      - all
+      - service
+      - orders
+    networks:
+      - app-network
+
+  otterscan:
+    image: otterscan/otterscan:latest
+    restart: unless-stopped
+    ports:
+      - "5100:80"
+    profiles:
+      - all
+      - blockchain
+      - service
+    depends_on:
+      - blockchain
+    networks:
+      - app-network
+
+  # -------
+  # Nginx
+  # -------
+  nginx:
+    image: nginx:latest
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    profiles:
+      - nginx
+    networks:
+      - app-network
+
+  # --------
+  # Clients
+  # --------
+  auth_client:
+    build:
+      context: ./clients/auth/
+    env_file:
+      - ./clients/.env.docker
+    profiles:
+      - clients
+    networks:
+      - app-network
+
+  customer_client:
+    build:
+      context: ./clients/customer/
+    env_file:
+      - ./clients/.env.docker
+    profiles:
+      - clients
+    networks:
+      - app-network
+
+  vendor_client:
+    build:
+      context: ./clients/vendor/
+    env_file:
+      - ./clients/.env.docker
+    profiles:
+      - clients
+    networks:
+      - app-network
+
+  # --------
+  # Services
+  # --------
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: auth_service
+    restart: on-failure
+    depends_on:
+      - kafka
+      - keycloak
+      - redis
+    ports:
+      - "8001:3001"
+    env_file:
+      - ./crates/auth/.env.docker
+    extra_hosts:
+      - "api.emarket.com:172.18.0.14"
+    profiles:
+      - all
+      - auth
+    networks:
+      - app-network
+
+  customers:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: customers_service
+    restart: on-failure
+    depends_on:
+      - customers_db
+      - keycloak
+      - kafka
+    ports:
+      - "8002:3002"
+    env_file:
+      - ./crates/customers/.env.docker
+    profiles:
+      - all
+      - customers
+    networks:
+      - app-network
+
+  vendors:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: vendors_service
+    restart: on-failure
+    depends_on:
+      - vendors_db
+      - keycloak
+      - kafka
+    ports:
+      - "8003:3003"
+    env_file:
+      - ./crates/vendors/.env.docker
+    profiles:
+      - all
+      - vendors
+    networks:
+      - app-network
+
+  blob:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: blob_service
+    depends_on:
+      - keycloak
+    restart: on-failure
+    ports:
+      - "8004:3004"
+    env_file:
+      - ./crates/blob/.env.docker
+    profiles:
+      - all
+      - blob
+    networks:
+      - app-network
+
+  goods:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: goods_service
+    restart: on-failure
+    depends_on:
+      - mongo
+      - keycloak
+    ports:
+      - "8005:3005"
+    env_file:
+      - ./crates/goods/.env.docker
+    profiles:
+      - all
+      - goods
+    networks:
+      - app-network
+
+  orders:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: orders_service
+    restart: on-failure
+    depends_on:
+      - orders_db
+      - keycloak
+    ports:
+      - "8006:3006"
+    env_file:
+      - ./crates/orders/.env.docker
+    profiles:
+      - all
+      - orders
+    networks:
+      - app-network
+
+  blockchain:
+    build:
+      context: ./crates/blockchain_dev/
+      dockerfile: Dockerfile
+    ports:
+      - "8007:3007"
+      - "8545:8545"
+    environment:
+      PORT: 3007
+    profiles:
+      - all
+      - blockchain
+      - orders
+    networks:
+      - app-network
+

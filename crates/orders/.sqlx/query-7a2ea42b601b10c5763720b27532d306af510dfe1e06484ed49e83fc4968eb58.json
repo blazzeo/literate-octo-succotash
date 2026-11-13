@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM OrderGoods\n        WHERE order_id = $1 \n        AND good_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7a2ea42b601b10c5763720b27532d306af510dfe1e06484ed49e83fc4968eb58"
+}

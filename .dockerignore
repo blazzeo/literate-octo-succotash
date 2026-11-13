@@ -1,0 +1,6 @@
+**/.git
+**/.gitignore
+**/target
+**/static
+.DS_Store
+**/tests

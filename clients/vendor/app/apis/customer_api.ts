@@ -1,0 +1,2 @@
+export const CUSTOMERS_SERVICE_URI = import.meta.env.VITE_CUSTOMERS_SERVICE_URI;
+export const CUSTOMERS_CLIENT_URI = import.meta.env.VITE_CUSTOMERS_CLIENT_URI;

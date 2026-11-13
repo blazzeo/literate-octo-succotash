@@ -1,0 +1,63 @@
+import axios from "axios"
+import { BlobManifest } from "../context/types";
+
+export const BLOB_SERVICE_URI = import.meta.env.VITE_BLOB_SERVICE_URI;
+
+export async function deleteImage(path: string) {
+	try {
+		let res = await axios.delete(path, { withCredentials: true })
+		return res.data
+	} catch (error) {
+		console.error(error)
+		throw error
+	}
+}
+
+export async function upload_files(good_id: string, files: File[]) {
+	const formData = new FormData();
+
+	// append all files
+	files.forEach((file) => {
+		formData.append("files", file); // "files" = field name expected by backend
+	});
+
+	try {
+		const response = await axios.post(
+			`${BLOB_SERVICE_URI}/file/${localStorage.getItem('user_id')}/${good_id}`,
+			formData,
+			{
+				withCredentials: true,
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			}
+		);
+
+		return response.data;
+	} catch (error) {
+		console.error("File upload failed", error);
+		throw error;
+	}
+}
+
+export async function fetchGoodBlobManifest(user_id: string, good_id: string): Promise<BlobManifest> {
+	try {
+		let res = await axios.get(`${BLOB_SERVICE_URI}/info/goods/${user_id}/${good_id}`)
+
+		return res.data as BlobManifest
+	} catch (error) {
+		console.error(error)
+		throw error
+	}
+}
+
+export async function uploadAvatar(file: File, userId: string) {
+	let formData = new FormData();
+	formData.append("file", file);
+
+	let res = await axios.post(`${BLOB_SERVICE_URI}/file/avatars/${userId}.png`, formData, {
+		withCredentials: true,
+	});
+
+	return res.data;
+}

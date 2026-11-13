@@ -1,0 +1,23 @@
+[package]
+name = "blob"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum.workspace = true
+axum-extra.workspace = true
+clap.workspace = true
+dotenv.workspace = true
+image.workspace = true
+middleware.workspace = true
+rdkafka.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+init_utils = { workspace = true, features = ["kafka"] }
+service_error = { workspace = true, features = ["keycloak"] }
+tracing_logger.workspace = true
+uuid = { workspace = true }
+chrono = { workspace = true, features = ["now"] }

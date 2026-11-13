@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO OrderGoods (\n                order_id,\n                good_id,\n                amount,\n                price_per_unit\n            )\n            VALUES ($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Int4",
+        "Numeric"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "23737011b49e75769040c9d20953365c37740ba08a500c82202c0f76fb7afc3c"
+}

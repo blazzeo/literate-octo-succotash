@@ -1,0 +1,21 @@
+[package]
+name = "goods"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum.workspace = true
+axum-extra.workspace = true
+clap.workspace = true
+dotenv.workspace = true
+init_utils = { workspace = true, features = ["kafka"] }
+mongodb.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+# tower-http.workspace	= true
+middleware.workspace = true
+serde_json.workspace = true
+service_error = { workspace = true, features = ["mongo", "keycloak"] }
+tracing_logger.workspace = true

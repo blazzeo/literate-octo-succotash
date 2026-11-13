@@ -1,0 +1,16 @@
+[package]
+name = "init_utils"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+kafka = ["dep:rdkafka"]
+
+[dependencies]
+axum = { workspace = true, features = ["json", "query", "tokio", "http1"] }
+middleware = { workspace = true }
+rdkafka = { workspace = true, optional = true }
+reqwest = { workspace = true }
+tower-http = { workspace = true }
+tracing = { workspace = true }

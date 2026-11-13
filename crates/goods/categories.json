@@ -1,0 +1,4 @@
+{
+	"medical": ["pills", "bandages"],
+	"tech": ["phones", "headphones", "computers"]
+}

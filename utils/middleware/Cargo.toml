@@ -1,0 +1,11 @@
+[package]
+name = "middleware"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { workspace = true, features = ["multipart"] }
+axum-extra = { workspace = true }
+jsonwebtoken = { workspace = true }
+serde = { workspace = true }
+service_error = { workspace = true, features = ["keycloak"] }

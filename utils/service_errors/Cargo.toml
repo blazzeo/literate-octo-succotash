@@ -1,0 +1,27 @@
+[package]
+name = "service_error"
+version = "0.1.1"
+edition = "2024"
+
+[features]
+default = []
+kafka = ["dep:rdkafka"]
+keycloak = ["dep:keycloak"]
+mongo = ["dep:mongodb"]
+orm = ["dep:sea-orm"]
+smtp = ["dep:lettre"]
+sqlx = ["dep:sqlx"]
+
+[dependencies]
+axum = { workspace = true, features = ["json", "query", "tokio", "http1"] }
+jsonwebtoken.workspace = true
+serde_json.workspace = true
+thiserror = { version = "2", default-features = false }
+tracing.workspace = true
+
+keycloak = { workspace = true, optional = true }
+lettre = { workspace = true, optional = true }
+mongodb = { workspace = true, optional = true }
+rdkafka = { workspace = true, optional = true }
+sea-orm = { workspace = true, optional = true }
+sqlx = { workspace = true, optional = true }

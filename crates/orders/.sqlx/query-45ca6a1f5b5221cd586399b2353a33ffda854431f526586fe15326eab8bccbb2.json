@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM OrderGoods\n        WHERE order_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "order_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "good_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "amount",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "price_per_unit",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "45ca6a1f5b5221cd586399b2353a33ffda854431f526586fe15326eab8bccbb2"
+}

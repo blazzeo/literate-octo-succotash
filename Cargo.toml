@@ -1,0 +1,68 @@
+[workspace]
+resolver = "3"
+members = [
+	"crates/vendors/",
+	"crates/customers/",
+	"crates/auth/",
+	"crates/blob/",
+	"crates/goods/",
+	"crates/orders/",
+	"utils/init_utils/",
+	"utils/middleware/",
+	"utils/service_errors/",
+	"utils/tracing_logger/",
+]
+exclude = [
+	"crates/blockchain_dev"
+]
+
+[profile.release]
+lto = "thin"
+debug = "none"
+
+[workspace.dependencies]
+async-trait = { version = "0.1", default-features = false }
+axum = { version = "0.8", default-features = false, features = ["macros"] }
+axum-extra = { version = "0.10", default-features = false, features = ["cookie", "cookie-signed", "typed-routing"] }
+clap = { version = "4", default-features = false, features = ["derive", "env", "std"] }
+cookie = { version = "0.18", default-features = false }
+dotenv = { version = "0.15", default-features = false }
+futures-util = { version = "0.3", default-features = false }
+image = { version = "0.25", default-features = false }
+init_utils = { path = "./utils/init_utils/" }
+jsonwebtoken = { version = "8", default-features = false }
+keycloak = { version = "26", default-features = false, features = ["tags-all"] }
+lettre = { version = "0.11", default-features = false, features = [
+  "smtp-transport",
+  "tokio1",
+  "builder",
+  "tokio1-native-tls",
+] }
+middleware = { path = "./utils/middleware/" }
+mongodb = { version = "3.2", default-features = false, features = ["dns-resolver", "rustls-tls", "compat-3-0-0"] }
+rdkafka = { version = "0.37", default-features = false, features = ["tokio"] }
+redis = { version = "0.24", default-features = false, features = ["tokio-comp"] }
+reqwest = { version = "0.12", default-features = false, features = ["json"] }
+sea-orm = { version = "1.0", default-features = false, features = [
+  "sqlx-postgres",
+  "runtime-tokio-rustls",
+  "macros",
+  "with-json",
+  "postgres-array",
+  "debug-print",
+] }
+sea-orm-migration = { version = "1.1", features = ["runtime-tokio-rustls", "sqlx-postgres"] }
+serde = { version = "1", default-features = false, features = ["derive"] }
+serde_json = { version = "1", default-features = false }
+service_error = { path = "./utils/service_errors/" }
+time = { version = "0.3", default-features = false }
+tokio = { version = "1", default-features = false, features = ["full"] }
+tower-http = { version = "0.6", default-features = false, features = ["cors"] }
+tracing = { version = "0.1", default-features = false }
+tracing_logger = { path = "./utils/tracing_logger/" }
+uuid = { version = "1", default-features = false, features = ["serde", "v4"] }
+validator = { version = "0.16", default-features = false, features = ["derive"] }
+sqlx = { version = "0.8", default-features = false, features = ["postgres", "runtime-tokio", "derive", "uuid"] }
+bigdecimal = { version = "0.4", default-features = false }
+chrono = { version = "0.4", default-features = false, features = ["std", "alloc"]}
+alloy = { version = "1.0", default-features = false, features = ["full"]}
